@@ -16,20 +16,6 @@ firebase = pyrebase.initialize_app(config)
 
 db = firebase.database()
 
-# db.child("todo").child("1234").update({"done":True,"itemDataText":"1111","uid":"lmao"})
-# TESTING to search through details dictionary
-details = db.child("todo").get()
-details = dict(OrderedDict(details.val()))
-print(details)
-
-for key, value in details.items():
-    print("key", key)
-    print("value", value)
-    if value['itemDataText'] == "1111":
-        print("THANK GOD")
-        print(value['uid'])
-        db.child("todo").child(value['uid']).update({"done":False,"itemDataText":"A STAR...","uid":"A STAR..."})
-
 from flask import *
 
 app = Flask(__name__)
@@ -39,7 +25,6 @@ app = Flask(__name__)
 def basic():
     if request.method == 'POST':
         if request.form['submit'] == 'add':
-
             name = request.form['name']
             db.child("todo").push(name)
             todo = db.child("todo").get()
@@ -50,6 +35,26 @@ def basic():
         return render_template('index.html')
     return render_template('index.html')
 
+@app.route('/string_match', methods=['POST'])
+def string_match():
+    # Obtain string from POST request, number that is keyed in the lock
+    string_ = request.form['keypad']
+    
+    # db.child("todo").child("1234").update({"done":True,"itemDataText":"1111","uid":"lmao"})
+    # TESTING to search through details dictionary
+    details = db.child("todo").get()
+    details = dict(OrderedDict(details.val()))
+    print(details)
+
+    for key, value in details.items():
+        print("key", key)
+        print("value", value)
+        if value['itemDataText'] == string_:
+            print("THANK GOD")
+            print(value['uid'])
+
+            # Update 'done' in server
+            db.child("todo").child(value['uid']).update({"done":False,"itemDataText":"A STAR...","uid":"A STAR..."})
 
 if __name__ == '__main__':
     app.run(debug=True)
