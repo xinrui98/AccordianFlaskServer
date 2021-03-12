@@ -35,11 +35,13 @@ def basic():
         return render_template('index.html')
     return render_template('index.html')
 
-@app.route('/string_match', methods=['POST'])
+
+@app.route('/string_match', methods=['GET'])
 def string_match():
     # Obtain string from POST request, number that is keyed in the lock
-    string_ = request.form['keypad']
-    
+    string_ = request.args.get("string")
+    # string_ = request.form['keypad']
+
     # db.child("todo").child("1234").update({"done":True,"itemDataText":"1111","uid":"lmao"})
     # TESTING to search through details dictionary
     details = db.child("todo").get()
@@ -51,10 +53,13 @@ def string_match():
         print("value", value)
         if value['itemDataText'] == string_:
             print("THANK GOD")
-            print(value['uid'])
-
+            uid = value["uid"]
+            itemDataText = value["itemDataText"]
+            print("value uid:",uid)
+            print("value value:",itemDataText)
             # Update 'done' in server
-            db.child("todo").child(value['uid']).update({"done":False,"itemDataText":"A STAR...","uid":"A STAR..."})
+            db.child("todo").child(value['uid']).update({"done": False, "itemDataText": itemDataText, "uid": uid})
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="192.168.31.197", debug=False)
