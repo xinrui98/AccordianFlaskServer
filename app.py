@@ -20,6 +20,7 @@ from flask import *
 
 app = Flask(__name__)
 
+valid_passwords=[]
 
 @app.route('/', methods=['GET', 'POST'])
 def basic():
@@ -34,6 +35,18 @@ def basic():
             db.child("todo").remove()
         return render_template('index.html')
     return render_template('index.html')
+
+@app.route('/valid', methods=['GET'])
+def send_to_arduino():
+    print("sending to arduino")
+    string_ = request.args.get("string")
+    for p in valid_passwords:
+        if p==string_:
+            return make_response(jsonify({"open": "1"}))
+
+    return make_response(jsonify({"open": "0"}))
+
+
 
 
 @app.route('/string_match', methods=['GET'])
@@ -58,8 +71,12 @@ def string_match():
             print("value uid:",uid)
             print("value value:",itemDataText)
             # Update 'done' in server
-            db.child("todo").child(value['uid']).update({"done": False, "itemDataText": itemDataText, "uid": uid})
+            db.child("todo").child(value['uid']).update({"done": True, "itemDataText": itemDataText, "uid": uid})
 
+            #append to valid passcode lists
+            valid_passwords.append(str(itemDataText))
+
+    return "Done"
 
 if __name__ == '__main__':
-    app.run(host="192.168.31.197", debug=False)
+    app.run(host="127.0.0.1:5000", debug=False)
